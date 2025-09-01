@@ -12,19 +12,32 @@
 const search = instantsearch({
   appId: '{{ .Site.Params.algolia_appId }}',
   indexName: '{{ .Site.Params.algolia_indexName }}',
-  apiKey: '{{ .Site.Params.algolia_apiKey }}'
+  apiKey: '{{ .Site.Params.algolia_apiKey }}',
+
+  // ⛔ prevent showing all posts when query is empty
+  searchFunction(helper) {
+    const q = (helper.state.query || '').trim();
+    const hitsEl = document.querySelector('#search-hits');
+
+    if (!q) {
+      if (hitsEl) hitsEl.innerHTML = ''; // clear previous results
+      return; // don't run a search
+    }
+    helper.search(); // run the search normally
+  }
 });
 
 const hitTemplate = function(hit) {
-/*  if (hit === null){
+ if (hit === null){
       return;
-  }*/
+  }
+
   let date = '';
   if (hit.date) {
     date = moment.unix(hit.date).format('MMM D, YYYY');
   }
   let url = `${hit.url}#${hit.anchor}`;
-  const title = hit._highlightResult.title.value;
+  const title = hit._highlightResult?.title?.value || hit.title || "Untitled";
 
   let breadcrumbs = '';
   if (hit._highlightResult.headings) {
@@ -36,6 +49,9 @@ const hitTemplate = function(hit) {
   let content = "" ; 
   if (hit._highlightResult.content){
       content = hit._highlightResult.content.value;
+      if (content =="") {
+        content = hit.summary;
+      }
   }
   else{
       content = hit.summary;
