@@ -34,7 +34,8 @@ const hitTemplate = function(hit) {
 
   let date = '';
   if (hit.date) {
-    date = moment.unix(hit.date).format('MMM D, YYYY');
+    //date = moment.unix(hit.date).format('MMM D, YYYY');
+    date = hit.date;
   }
   let url = `${hit.url}#${hit.anchor}`;
   const title = hit._highlightResult?.title?.value || hit.title || "Untitled";
